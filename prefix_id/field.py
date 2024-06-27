@@ -14,6 +14,8 @@ class PrefixIDField(models.CharField):
 
     def __init__(self, *args, prefix: str = None, **kwargs):
         self.prefix = prefix or None
+        self.separator = kwargs.get("separator", "_")
+
         prefix_length = len(self.prefix or "")
 
         # 'max_length' is the sum of prefix length + 1 char for the
@@ -30,7 +32,7 @@ class PrefixIDField(models.CharField):
         encoded_value = generate_base62_id()
 
         if self.prefix and isinstance(self.prefix, str):
-            return f"{self.prefix}_{encoded_value}"
+            return f"{self.prefix}{self.separator}{encoded_value}"
 
         return encoded_value
 
@@ -52,7 +54,9 @@ class PrefixIDField(models.CharField):
                 code="invalid_type",
             )
         else:
-            parts = value.rsplit("_", 1)
+            # Split from the left-to-right, split up to 1 time at our
+            # separator character
+            parts = value.split(self.separator, 1)
 
             incorrect_or_missing_prefix = self.prefix and (len(parts) == 1 or parts[0] != self.prefix)
             unwanted_prefix_present = not self.prefix and len(parts) > 1
