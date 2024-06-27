@@ -14,7 +14,7 @@ class PrefixIDField(models.CharField):
 
     def __init__(self, *args, prefix: str = None, **kwargs):
         self.prefix = prefix or None
-        self.separator = kwargs.get("separator", "_")
+        self.separator = kwargs.pop("separator", "_")
 
         prefix_length = len(self.prefix or "")
 
